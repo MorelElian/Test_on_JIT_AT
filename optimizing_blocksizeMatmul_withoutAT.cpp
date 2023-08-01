@@ -1,3 +1,4 @@
+//Optimizing Blocksize Matmul without AT
 #include <cstdio>
 #include <cstdlib>
 
@@ -6,15 +7,15 @@ template<typename T>
 T myMin(T a, T b) {
     return (a < b) ? a : b;
 }
-template <__autotune__ int** taille_block>
-[[clang::jit]]int multiplyMatrixByBlocks(int** A, int** B, int** C, int n) {
+
+int multiplyMatrixByBlocks(int** A, int** B, int** C, int n,int taille_block) {
    // Taking care of the loop ordrer in order to minimize cache misses 
-    for (int i = 0; i < n; i += *taille_block) {
-        for (int k = 0; k < n; k += *taille_block) {
-            for (int j = 0; j < n; j += *taille_block) {
-                for (int ii = i; ii < myMin(i + *taille_block, n); ++ii) {
-                    for (int kk = k; kk < myMin(k + *taille_block, n); ++kk) {
-                        for (int jj = j; jj < myMin(j + *taille_block, n); ++jj) {
+    for (int i = 0; i < n; i += taille_block) {
+        for (int k = 0; k < n; k += taille_block) {
+            for (int j = 0; j < n; j += taille_block) {
+                for (int ii = i; ii < myMin(i + taille_block, n); ++ii) {
+                    for (int kk = k; kk < myMin(k + taille_block, n); ++kk) {
+                        for (int jj = j; jj < myMin(j + taille_block, n); ++jj) {
                             C[ii][jj] += A[ii][kk] * B[kk][jj];
                         }
                     }
@@ -22,7 +23,7 @@ template <__autotune__ int** taille_block>
             }
         }
     }
-    return *taille_block;
+    return taille_block;
 }
 int** generateMat(int N) {
     /*std::random_device rd;
@@ -60,15 +61,17 @@ int main(int argc, char * argv[])
     int** C = initialiseMat(N);
     printf("%d \n",N);
     int taille_block[9] = {2,4,8,16,32,64,128,256,512};
-    for(int i = 0; i<10; i++)
+    for (int j = 0; j <9; j++)
     {
-        long long t1 = __rdtsc();
-        int block = multiplyMatrixByBlocks<&taille_block>(A,B,C,N);
-        long long t2 = __rdtsc();
-        FILE* fichier = fopen("trace_blocksizeMatmul.csv", "a");
-        fprintf(fichier, "%d;%d;%lld;%d\n",i,block,t2-t1,N);
-        fclose(fichier);    
+        for(int i = 0; i<10; i++)
+        {
+            long long t1 = __rdtsc();
+            multiplyMatrixByBlocks(A,B,C,N,j);
+            long long t2 = __rdtsc();
+            FILE* fichier = fopen("trace_blocksizeMatmul_withoutAT.csv", "a");
+            fprintf(fichier, "%d;%d;%d;%lld;%d\n",i,j,t2-t1,N);
+            fclose(fichier);    
+        }
     }
-    
     
 }

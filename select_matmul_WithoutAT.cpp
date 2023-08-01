@@ -1,5 +1,5 @@
+// JIT version without AT
 #include <cstdio>
-#include <cstdlib>
 // Fonction pour effectuer la multiplication matricielle (ordre ijk)
 void matmul1(int** A, int** B, int** C, int N) {
     for (int i = 0; i < N; ++i) {
@@ -33,15 +33,6 @@ void matmul3(int** A, int** B, int** C, int N) {
         }
     }
 }
-
-template<__autotune__ int** id_param>
-[[clang::jit]]int launch_matmul(void (*funcArray[])(int**, int**, int**, int),int ** A, int ** B, int **C,int N)       
-{
-    funcArray[*id_param](A,B,C,N);
-    return *id_param ;
-
-}
-
 int main(int argc,char * argv[]) {
      // Taille des matrices (N x N)
 
@@ -67,15 +58,18 @@ int main(int argc,char * argv[]) {
             C[i][j] = 0;
         }
     }
-    for(int i = 0; i < 10; i++)
+    for (int j = 0 ; j <3;j++)
     {
-        
-        long long t1 = __rdtsc();
-        int result = launch_matmul<&tab>(matmulFunctions,A,B,C,N);
-        long long t2 = __rdtsc();
-        FILE* fichier = fopen("trace_selecting_matmul.csv", "a");
-        fprintf(fichier, "%d;%d;%d;%lld\n",N,i,result,t2-t1);
-        fclose(fichier);
+        for(int i = 0; i < 10; i++)
+        {
+            
+            long long t1 = __rdtsc();
+            matmulFunctions[j](A,B,C,N);
+            long long t2 = __rdtsc();
+            FILE* fichier = fopen("trace_selecting_matmul_withoutAT.csv", "a");
+            fprintf(fichier, "%d;%d;%d;%lld\n",i,j,result,t2-t1);
+            fclose(fichier);
+        }
     }
     
     return 0;

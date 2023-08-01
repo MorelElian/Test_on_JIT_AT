@@ -1,8 +1,9 @@
 //#include <iostream>
 #include <cstdio>
 #include <cstdlib>
-template <int x,__autotune__ int** y>
+template <__autotune__ int** y>
 [[clang::jit]] int run_c(){
+    
     int *a;
     int c = 0;
     int d = 4;
@@ -11,34 +12,27 @@ template <int x,__autotune__ int** y>
         c = i +c +4;
         d = c*2 -5;
     }
-    printf("fin boucle\n");
-    return d;
+    
+    
+    return *y;
 }
 int main(int argc, char *argv[])
 {
     int z[3];
-    int q[2];
-    int a = std::atoi(argv[1]);
-    int y = std::atoi(argv[2]);
-    //std::cout << "a and y initialized \n";
-    
-    z[0] = y;
-    z[1] = 100000000;
-    z[2] = 1000000;
-    q[0] = y+1;
-    q[1] = 3;
-    int * c;
-    c = (int *) malloc(sizeof(int));
-    *c = 1200;
-    int d = a;
-    
-    int test = run_c<z[0],&z>();
-    long long time2 = __rdtsc();
-    int test2 = run_c<z[0],&z>();
-    long long time3 = __rdtsc();
-    int test3 = run_c<z[0],&z>();
-    run_c<z[0],&z>();
-    run_c<z[0],&z>();
-    run_c<z[0],&z>();
-    printf("pas de galère\n");
+    int y = std::atoi(argv[1]);
+    z[0] = 100;
+    z[1] = 1000000000;
+    z[2] = y;
+    for(int i = 0 ; i <10; i++)
+    {
+        long long t1 = __rdtsc();
+        int result = run_c<&z>();
+        long long t2 = __rdtsc();
+        //printf("ttttt");
+        FILE* fichier = fopen("data/trace_basic_autotuning.csv", "a");
+        fprintf(fichier, "%d;%d;%lld\n",i,result,t2-t1);
+        fclose(fichier);
+        
+    }
+    ;
 }
