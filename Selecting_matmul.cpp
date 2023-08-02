@@ -50,7 +50,6 @@ int main(int argc,char * argv[]) {
 
     // Appel de matmul1, matmul2 et matmul3 pour effectuer la multiplication
     
-    
     void (*matmulFunctions[3])(int**, int**, int**, int) = {matmul1, matmul2, matmul3};
     int tab[3] = {0,1,2};
     int N = std::atoi(argv[1]);
@@ -73,7 +72,7 @@ int main(int argc,char * argv[]) {
         long long t1 = __rdtsc();
         int result = launch_matmul<&tab>(matmulFunctions,A,B,C,N);
         long long t2 = __rdtsc();
-        FILE* fichier = fopen("trace_selecting_matmul.csv", "a");
+        FILE* fichier = fopen("../data/trace_selecting_matmul.csv", "a");
         fprintf(fichier, "%d;%d;%d;%lld\n",N,i,result,t2-t1);
         fclose(fichier);
     }
