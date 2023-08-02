@@ -1,4 +1,5 @@
 // JIT version without AT
+#include <cstdlib>   
 #include <cstdio>
 // Fonction pour effectuer la multiplication matricielle (ordre ijk)
 void matmul1(int** A, int** B, int** C, int N) {
@@ -58,16 +59,20 @@ int main(int argc,char * argv[]) {
             C[i][j] = 0;
         }
     }
+    // warm up 
+    
     for (int j = 0 ; j <3;j++)
     {
-        for(int i = 0; i < 10; i++)
+        matmulFunctions[j](A,B,C,N);
+        matmulFunctions[j](A,B,C,N);
+        for(int i = 0; i < 500; i++)
         {
             
             long long t1 = __rdtsc();
             matmulFunctions[j](A,B,C,N);
             long long t2 = __rdtsc();
-            FILE* fichier = fopen("trace_selecting_matmul_withoutAT.csv", "a");
-            fprintf(fichier, "%d;%d;%d;%lld\n",i,j,result,t2-t1);
+            FILE* fichier = fopen("data/trace_selecting_matmul_withoutAT.csv", "a");
+            fprintf(fichier, "%d;%d;%d;%lld\n",N,i,j,t2-t1);
             fclose(fichier);
         }
     }
